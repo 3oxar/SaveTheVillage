@@ -368,6 +368,7 @@ MonoBehaviour:
   PeasantText: {fileID: 352620150}
   WarText: {fileID: 1406732985}
   QuantiAttackText: {fileID: 1908310235}
+  VolumeAudioButtonText: {fileID: 361715851}
   WheatTimerImage: {fileID: 978612856}
   EatingTimerImage: {fileID: 303837289}
   AttackTimerImage: {fileID: 832225161}
@@ -375,7 +376,6 @@ MonoBehaviour:
   WarTimerImage: {fileID: 632751226}
   PeasantButton: {fileID: 617821322}
   WarButton: {fileID: 899531961}
-  VolumeAudioButton: {fileID: 1514141915}
   endGamePanel: {fileID: 1234100731}
   winGamePanel: {fileID: 1416722146}
   PausePanel: {fileID: 45207920}
@@ -1928,7 +1928,7 @@ GameObject:
   - component: {fileID: 361715852}
   - component: {fileID: 361715851}
   m_Layer: 5
-  m_Name: Text (TMP)
+  m_Name: VolumeAudioButtonText (TMP)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4167,7 +4167,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\u0420\u0435\u0441\u0442\u0430\u0440"
+  m_text: "\u0420\u0435\u0441\u0442\u0430\u0440\u0442"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -5542,7 +5542,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\u0420\u0435\u0441\u0442\u0430\u0440"
+  m_text: "\u0420\u0435\u0441\u0442\u0430\u0440\u0442"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
