@@ -10,9 +10,7 @@ public class VillageControl : MonoBehaviour
     [SerializeField] TextMeshProUGUI WheatText;//текст пшеницы
     [SerializeField] TextMeshProUGUI PeasantText;//текст крестьян
     [SerializeField] TextMeshProUGUI WarText;//текст войнов
-
     [SerializeField] TextMeshProUGUI QuantiAttackText;//кол-во нападающих
-
 
     [SerializeField] Image WheatTimerImage;//отображения таймера нового сбора урожая
     [SerializeField] Image EatingTimerImage;//отображения таймера приема пищи
@@ -20,20 +18,20 @@ public class VillageControl : MonoBehaviour
     [SerializeField] Image PeasantTimerImage;//отображение таймера появление нового крестьянина
     [SerializeField] Image WarTimerImage;//отображение таймера появление нового война
 
-
     [SerializeField] Button PeasantButton;//кнопка нанять крестьянина
     [SerializeField] Button WarButton;//кнопка нанять война
-
 
     [SerializeField] GameObject endGamePanel;//панель проигрыша
     [SerializeField] GameObject winGamePanel;//панель победы
 
+    [SerializeField] TextMeshProUGUI[] FinalStatisticsText = new TextMeshProUGUI[4];//текст на экране где будем выводить статистику
+
     int peasant = 5, 
         war = 0,
-        wheat = 45; //переменные хранящие ресурсы
+        wheat = 15; //переменные хранящие ресурсы
     int totalPeople;//всего людей
-    int attack = 1;//нападающие войны
-    
+    int attack = 0;//нападающие войны
+    int nullAttacker = 0;//переменая для атаки без врагов
 
 
     float getWheatTime, //время для получения пшеницы
@@ -41,14 +39,16 @@ public class VillageControl : MonoBehaviour
           getWarTime,//время для получения нового война
           eatingTime,//время приема пищи
           attackTime,//время нападения 
-          attackTimeIncrease = 3;//время для нападения 
+          attackTimeIncrease = 25;//время для нападения 
 
     bool hirePeasant = false;//переменая для отслеживание нажатия кнопки что бы нанять крестьянина
     bool hireWar = false;//переменая для отслеживание нажатия кнопки что бы нанять война
     bool endGame = false;//проверка на конец игры
     bool winGame = false;//проверка на победу
     bool pause = false;
-    
+
+
+    int[] finalStatistics = new int[4];//переменая для подсчета собраного урожая, нанятых крестья и войнов, кол-во волн
 
     // Start is called before the first frame update
     void Start()
@@ -58,6 +58,9 @@ public class VillageControl : MonoBehaviour
         WarWrite();     //вывод стартовых ресурсов
 
         AttackWrite();//вывод кол-во нападающих
+
+        CheckButton();//проверяем хватает ли ресурсов в начале игры для найма кого-то
+       
     }
 
     // Update is called once per frame
@@ -73,14 +76,16 @@ public class VillageControl : MonoBehaviour
             if (getWheatTime >= 3)//проверяем прошло ли 5 секунд
             {
                 wheat += 1 * peasant;//добавляем за каждого креастьянина 1 пшеницу
-
+                finalStatistics[0] += 1 * peasant;//считаем сколько добыто пшеницы за все время игры
+                CheckButton();//првоеряем хватает ли ресурсво после сбора рожая 
+                CheckWinGame();//проверяем выполнены условия победы
                 getWheatTime = 0;//обнуляем время полученя урожая
 
                 WheatWrite();//вывод пшеницы
             }
 
             eatingTime += Time.deltaTime;//считаем врем до приема пищи
-            EatingTimerImage.fillAmount = eatingTime / 12;//отображаем таймер атаки
+            EatingTimerImage.fillAmount = eatingTime / 12;//отображаем таймер приема пищи
 
             if (eatingTime >= 12)//проверяем прошло ли 12 секунд
             {
@@ -95,13 +100,21 @@ public class VillageControl : MonoBehaviour
 
             if (attackTime >= attackTimeIncrease)//проверяем прошло ли 30 секунд
             {
+                
                 if (war < attack)
                 {
                     endGame = true;
                     pause = true;
                 }
+                else if(nullAttacker < 2)//проверяем условия, если меньше 3 то атака будет без войска
+                {
+                    nullAttacker++;//увеличиваем переменукю, что бы через несколько ходов началис ь набеги с врагами
+                    attackTime = 0;//обнуляем время до нападения 
+                    finalStatistics[3] += 1;
+                }
                 else
                 {
+                    finalStatistics[3] += 1;//считаем сколько вол было за все время игры
                     attackTimeIncrease *= 1.1f;//увеличиваем время до след атаки
                     war -= attack;//отнимаем от войнов погибшее кол-во войнов
                     attack += 1;//увеличиваем кол-во нападающих
@@ -120,11 +133,13 @@ public class VillageControl : MonoBehaviour
                 if (getPeasantTime >= 6)//проверяем прошло ли 6 секунд
                 {
                     peasant++;//добавляем крестьянина
+                    finalStatistics[1] += 1;//считаем сколько крестьян было нанято за все время игры
                     PeasantButton.interactable = true;//делаем кнопку активной
                     getPeasantTime = 0;//обнуляем время получения нового крестьянина
                     hirePeasant = false;//убираем создание нового крестьянина
                     PeasantTimerImage.fillAmount = 0;//обнуляем шкалу времени нового крестьянина
                     PeasantWrite();//вывод крестьянина 
+                    CheckButton();//проверяем хватает ли ресурсов после завершения покупки крестьянина
                 }
             }
 
@@ -136,27 +151,26 @@ public class VillageControl : MonoBehaviour
                 if (getWarTime >= 8)//проверяем прошло ли 8 секунд
                 {
                     war++;//добавляем война
+                    finalStatistics[2] += 1;//считаем сколько войнов было нанято за все время игры
                     WarButton.interactable = true;//делаем кнопку активной
                     getWarTime = 0;//обнуляем время получения нового крестьянина
                     hireWar = false;//убираем создание нового крестьянина
                     WarTimerImage.fillAmount = 0;//обнуляем шкалу времени нового крестьянина
-                    WarWrite();//вывод крестьянина 
+                    WarWrite();//вывод войнов
+                    CheckWinGame();//проверяем выполнены условия победы
+                    CheckButton();//проверяем хватает ли ресурсов после завершения покупки вайна
                 }
             }
-
-            if (war >= 5 && wheat >= 100)
-            {
-                winGame = true;
-                pause = true;
-            }
-
         }
         else if (winGame == true)
         {
+            FinalStatistics();
             winGamePanel.SetActive(true);//включаем панель победы
         }
         else if(endGame == true) 
         {
+
+            FinalStatistics();
             endGamePanel.SetActive(true);//включаем панель проигрыша
         }
     }
@@ -172,6 +186,7 @@ public class VillageControl : MonoBehaviour
             hirePeasant = true;//переключаем переменую на создание крестьянина
             PeasantButton.interactable = false;//делаем кнопку неактивной
             wheat -= 10;//отнимаем пшеницу потраченую на крестьянина
+            CheckButton();//проверяем хватает ли ресурсво после после покупки крестьянина
             WheatWrite();//вывод пшеницы
         }
        
@@ -187,6 +202,7 @@ public class VillageControl : MonoBehaviour
             hireWar = true;//переключаем переменую на создание война
             WarButton.interactable = false;//делаем кнопку неактивной
             wheat -= 20;//отнимаем пшеницу потраченую на война
+            CheckButton();//проверяем хватает ли ресурсво после после покупки война
             WheatWrite();//вывод пшеницы
 
         }
@@ -227,9 +243,47 @@ public class VillageControl : MonoBehaviour
         AttackWrite();
     }
 
+    /// <summary>
+    /// Проверяем хватает ли ресурсов на пакупку крестьянина или война 
+    /// </summary>
+    void CheckButton()
+    {
+        if (wheat < 10 || hirePeasant == true) PeasantButton.interactable = false;//
+        else PeasantButton.interactable = true;            //проверяем кнопку для найма крестьяница
+
+        if(wheat < 20 || hireWar == true) WarButton.interactable = false; //
+        else WarButton.interactable = true;            //проверяем кнопку для найма война
+
+    }
+
+    /// <summary>
+    /// проверяем условия для победы 
+    /// </summary>
+    void CheckWinGame()
+    {
+        if (war >= 10 && wheat >= 250)
+        {
+            winGame = true;
+            pause = true;
+        }
+    }
+
     void WheatWrite() => WheatText.text = wheat.ToString();//вывод пшеницы
     void PeasantWrite() => PeasantText.text = peasant.ToString();//вывод крестьян
     void WarWrite() => WarText.text = war.ToString();//вывод война
     void AttackWrite() => QuantiAttackText.text = attack.ToString();//вывод кол-во нападающих
-
+    
+    /// <summary>
+    /// записываем значение общей статистики
+    /// </summary>
+    void FinalStatistics()
+    {
+        FinalStatisticsText[0].text = finalStatistics[0].ToString();
+        FinalStatisticsText[1].text = finalStatistics[1].ToString();
+        FinalStatisticsText[2].text = finalStatistics[2].ToString();
+        FinalStatisticsText[3].text = finalStatistics[3].ToString();
+       
+    }
 }
+
+
