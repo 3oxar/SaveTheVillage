@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEditor.TextCore.Text;
 using UnityEngine;
+using UnityEngine.TextCore.Text;
 using UnityEngine.UI;
 
 public class VillageControl : MonoBehaviour
@@ -11,6 +12,8 @@ public class VillageControl : MonoBehaviour
     [SerializeField] TextMeshProUGUI PeasantText;//текст крестьян
     [SerializeField] TextMeshProUGUI WarText;//текст войнов
     [SerializeField] TextMeshProUGUI QuantiAttackText;//кол-во нападающих
+    [SerializeField] TextMeshProUGUI VolumeAudioButtonText;//текст кнопки изменения звука
+
 
     [SerializeField] Image WheatTimerImage;//отображения таймера нового сбора урожая
     [SerializeField] Image EatingTimerImage;//отображения таймера приема пищи
@@ -298,8 +301,17 @@ public class VillageControl : MonoBehaviour
     /// </summary>
     public void VolumeAudio()
     {
-        if(checkVolumeAudio != true) AudioListener.volume = 0;//если звук выключен устанавливаем громкость на 0
-        else AudioListener.volume = 1;
+        if (checkVolumeAudio != true)
+        {
+            AudioListener.volume = 0;//если звук выключен устанавливаем громкость на 0
+            VolumeAudioButtonText.text = "Вкл звук";
+        }
+        else
+        { 
+            AudioListener.volume = 1;//если звук включен устанавливаем громкость на 1
+            VolumeAudioButtonText.text = "Выкл звук";
+        }
+
 
         checkVolumeAudio = !checkVolumeAudio;//изменяем значение вкл/выкл звука
     }
