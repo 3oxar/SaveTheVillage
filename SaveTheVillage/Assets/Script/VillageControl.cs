@@ -23,8 +23,10 @@ public class VillageControl : MonoBehaviour
 
     [SerializeField] GameObject endGamePanel;//панель проигрыша
     [SerializeField] GameObject winGamePanel;//панель победы
+    [SerializeField] GameObject PausePanel;//панель паузы
 
     [SerializeField] TextMeshProUGUI[] FinalStatisticsText = new TextMeshProUGUI[4];//текст на экране где будем выводить статистику
+    [SerializeField] AudioSource[] GameAudioSources = new AudioSource[3];  
 
     int peasant = 5, 
         war = 0,
@@ -45,7 +47,8 @@ public class VillageControl : MonoBehaviour
     bool hireWar = false;//переменая для отслеживание нажатия кнопки что бы нанять война
     bool endGame = false;//проверка на конец игры
     bool winGame = false;//проверка на победу
-    bool pause = false;
+    bool pause = false;//проверка на паузу
+    bool checkVolumeAudio = false;//проверка на вкл/выкл звука
 
 
     int[] finalStatistics = new int[4];//переменая для подсчета собраного урожая, нанятых крестья и войнов, кол-во волн
@@ -60,7 +63,7 @@ public class VillageControl : MonoBehaviour
         AttackWrite();//вывод кол-во нападающих
 
         CheckButton();//проверяем хватает ли ресурсов в начале игры для найма кого-то
-       
+        
     }
 
     // Update is called once per frame
@@ -80,7 +83,7 @@ public class VillageControl : MonoBehaviour
                 CheckButton();//првоеряем хватает ли ресурсво после сбора рожая 
                 CheckWinGame();//проверяем выполнены условия победы
                 getWheatTime = 0;//обнуляем время полученя урожая
-
+                GameAudioSources[0].Play();//воспроизводим звук сбора урожая
                 WheatWrite();//вывод пшеницы
             }
 
@@ -92,6 +95,7 @@ public class VillageControl : MonoBehaviour
                 totalPeople = peasant + war;//считаем всего людей в деревне
                 wheat -= totalPeople;//отнимаем от пшеницы кол-во еды которую съели люди
                 eatingTime = 0;//обнуляем время приема пищи
+                GameAudioSources[0].Play();//воспроизводим звук приема пищи
                 WheatWrite();//вывод пищи
             }
 
@@ -100,7 +104,7 @@ public class VillageControl : MonoBehaviour
 
             if (attackTime >= attackTimeIncrease)//проверяем прошло ли 30 секунд
             {
-                
+                GameAudioSources[2].Play();//воспроизводим звук атаки
                 if (war < attack)
                 {
                     endGame = true;
@@ -140,6 +144,7 @@ public class VillageControl : MonoBehaviour
                     PeasantTimerImage.fillAmount = 0;//обнуляем шкалу времени нового крестьянина
                     PeasantWrite();//вывод крестьянина 
                     CheckButton();//проверяем хватает ли ресурсов после завершения покупки крестьянина
+                    GameAudioSources[1].Play();//воспроизводим звук получения крестьянина
                 }
             }
 
@@ -159,6 +164,7 @@ public class VillageControl : MonoBehaviour
                     WarWrite();//вывод войнов
                     CheckWinGame();//проверяем выполнены условия победы
                     CheckButton();//проверяем хватает ли ресурсов после завершения покупки вайна
+                    GameAudioSources[1].Play();//воспроизводим звук получения война
                 }
             }
         }
@@ -266,6 +272,36 @@ public class VillageControl : MonoBehaviour
             winGame = true;
             pause = true;
         }
+    }
+
+    /// <summary>
+    /// останавлевает или запускает игру
+    /// </summary>
+    public void PauseGame()
+    {
+        if (pause != true)
+        {
+            Time.timeScale = 0;//если пауза включена останавливаем время
+            PausePanel.SetActive(true);
+        }
+        else
+        {
+            Time.timeScale = 1;//если пауза выключина запускаем время
+            PausePanel.SetActive(false);
+        }
+
+        pause = !pause;//изменяем значение паузы при нажатие кнопки
+    }
+
+    /// <summary>
+    /// Включение или выключение звука
+    /// </summary>
+    public void VolumeAudio()
+    {
+        if(checkVolumeAudio != true) AudioListener.volume = 0;//если звук выключен устанавливаем громкость на 0
+        else AudioListener.volume = 1;
+
+        checkVolumeAudio = !checkVolumeAudio;//изменяем значение вкл/выкл звука
     }
 
     void WheatWrite() => WheatText.text = wheat.ToString();//вывод пшеницы
